@@ -4,9 +4,9 @@ plugins:
 - mkdockyard:
     repos:
       - url: "https://github.com/Textualize/textual.git"
-        ref: "main"
+        ref: "501372027f3abc75561881e3803efc34098dabe1"
       - url: "https://github.com/Textualize/rich.git"
-        ref: "master"
+        ref: "1d402e0c59f8765e420a5a4440eb2fca7465d1ae"
       - url: "https://github.com/pydantic/pydantic.git"
-        ref: "main"
+        ref: "08b64f7a43f96f02bb0af8d46aba67b3a68d6e88"
 - mkdocstrings:
