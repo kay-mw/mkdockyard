@@ -1,0 +1,8 @@
+*
+
+!.gitignore
+!.envrc
+!flake.lock
+!flake.nix
+!pyproject.toml
+!uv.lock
