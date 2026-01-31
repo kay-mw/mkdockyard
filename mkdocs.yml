@@ -1,13 +1,12 @@
-site_name: My Docs
+site_name: mkdockyard
 
 plugins:
 - mkdockyard:
     repos:
-      - name: "textual"
-        url: "https://github.com/Textualize/textual.git"
-        ref: "501372027f3abc75561881e3803efc34098dabe1"
+      - url: "https://github.com/Textualize/textual.git"
+        ref: "main"
+      - url: "https://github.com/Textualize/rich.git"
+        ref: "master"
+      - url: "https://github.com/pydantic/pydantic.git"
+        ref: "main"
 - mkdocstrings:
-    handlers:
-      python:
-        paths:
-          - .

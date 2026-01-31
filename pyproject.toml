@@ -16,6 +16,7 @@ license-files = ["LICEN[CS]E*"]
 dependencies = [
     "mkdocs>=1.6.1",
     "mkdocstrings-python>=2.0.1",
+    "platformdirs>=4.5.1",
 ]
 
 [project.entry-points."mkdocs.plugins"]

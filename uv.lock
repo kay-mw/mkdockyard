@@ -114,12 +114,14 @@ source = { editable = "." }
 dependencies = [
     { name = "mkdocs" },
     { name = "mkdocstrings-python" },
+    { name = "platformdirs" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "mkdocs", specifier = ">=1.6.1" },
     { name = "mkdocstrings-python", specifier = ">=2.0.1" },
+    { name = "platformdirs", specifier = ">=4.5.1" },
 ]
 
 [[package]]
