@@ -1,7 +1,25 @@
 [project]
-name = "mkdocs-multirepo"
+name = "mkdockyard"
 version = "0.1.0"
+authors = [
+  { name="kay-mw" },
+]
+description = "Allows for the integration of multiple repos into a single mkdocs instance - no git submodules required. The repos are coming to dock 🚢"
+readme = "README.md"
 requires-python = ">=3.14"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
 dependencies = [
     "mkdocs>=1.6.1",
 ]
+
+[project.entry-points."mkdocs.plugins"]
+mkdockyard = "mkdockyard.main:MkdockyardPlugin"
+
+[build-system]
+requires = ["uv_build >= 0.9.26, <0.10.0"]
+build-backend = "uv_build"
