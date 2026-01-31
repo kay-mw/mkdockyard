@@ -1,5 +1,13 @@
 site_name: My Docs
 
 plugins:
-  mkdockyard:
-    foo: {"b": 2}
+- mkdockyard:
+    repos:
+      - name: "textual"
+        url: "https://github.com/Textualize/textual.git"
+        ref: "501372027f3abc75561881e3803efc34098dabe1"
+- mkdocstrings:
+    handlers:
+      python:
+        paths:
+          - .
