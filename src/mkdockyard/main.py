@@ -1,9 +1,5 @@
 import concurrent.futures
 import hashlib
-
-# TODO:
-# - Add validation to `name`, i.e. it cannot contain slashes or other path un-safe
-# characters.
 import logging
 import os
 import shutil
@@ -160,7 +156,7 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
 
                     if cloned:
                         log.info(
-                            f"mkdockyard: Fetching '{info.url}' at ref '{info.ref}'"
+                            f"mkdockyard: Fetched '{info.url}' at ref '{info.ref}'"
                         )
                 except subprocess.CalledProcessError as e:
                     raise ConfigurationError(
@@ -231,6 +227,14 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
             name = repo.name
             url = repo.url
             ref = repo.ref
+
+            if "/" in name or "\\" in name:
+                log.warning(
+                    f"mkdockyard: Repo name {name} contains a slash. Including slashes"
+                    " in names is discouraged, as this may result in your name prefix"
+                    " being two directories (`before_slash.after_slash.my.module`) if"
+                    " there are characters after the slash."
+                )
 
             hashed_name = hashlib.sha256((url + ref).encode()).hexdigest()
             hashed_dir = cache_dir.joinpath(hashed_name)
@@ -350,7 +354,7 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
             old_name_path = hashed_dir.joinpath(os.listdir(hashed_dir)[0])
             log.info(
                 f"mkdockyard: Name change detected. Renaming '{old_name_path}' to"
-                f"'{output_path}'"
+                f" '{output_path}'"
             )
             os.rename(old_name_path, output_path)
         else:
