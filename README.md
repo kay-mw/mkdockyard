@@ -51,7 +51,9 @@ plugins:
 
 # Example
 
-::: textual.src.textual.cache.LRUCache
+<!-- Schema: `::: [name-in-mkdockyard-repos-config].path.to.your.module` -->
+
+textual.src.textual.cache.LRUCache
 
 ::: rich.rich.console.ConsoleDimensions
 
@@ -80,3 +82,35 @@ multiple repos and you end up with slow build times.
 This is unlikely to be a `mkdockyard` problem, as `mkdockyard` only takes
 milliseconds to build when using cached repos (though performance suggestions /
 improvements are always welcome).
+
+### Wh am I getting "Could not collect" errors when trying to document a cloned repo?
+
+This could be for a variety of reasons, such as not using the correct naming
+scheme, misspelling a path, etc.
+
+One dubious edge case to be aware of is: if you have a package installed in your
+environment (e.g., `mkdockyard` itself) and you're also trying to clone and
+document a repo with the same `name` in your config, you'll encounter name
+collision issues.
+
+You can solve this by either:
+
+1. Removing the repo from your config, and documenting the package directly.
+   `mkdocstrings` directly supports documenting packages installed in your
+   environment. **(Recommended)**
+
+2. If you _really need_ the package in your `repos` configuration, change the
+   name such that it doesn't conflict with the name of any installed packages.
+   For example, to clone and document `mkdockyard` when you also have
+   `mkdockyard` installed, you could do:
+
+```yml
+plugins:
+  - mkdockyard:
+      repos:
+        - name: mkdockyard_repo # Changed from 'mkdockyard' to avoid collision
+          url: "https://github.com/kay-mw/mkdockyard.git"
+          ref: "main"
+```
+
+Then reference it as `::: mkdockyard_repo.path.to.some.module`.
