@@ -16,6 +16,9 @@
 !docs/
 !docs/*.md
 
+!static/
+!static/site_example.png
+
 !src/
 !src/*.py
 
