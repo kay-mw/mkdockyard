@@ -6,7 +6,7 @@ authors = [
 ]
 description = "Allows for the integration of multiple repos into a single mkdocs instance - no git submodules required. The repos are coming to dock 🚢"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.9"
 classifiers = [
   "Programming Language :: Python :: 3",
   "Operating System :: OS Independent",
