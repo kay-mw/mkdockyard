@@ -10,6 +10,9 @@
 !README.md
 !mkdocs.yml
 
+!.github/
+!.github/workflows/
+!.github/workflows/*.yml
 
 !tests/
 
