@@ -10,7 +10,7 @@ to dock 🚢
 uv add mkdockyard
 ```
 
-**Requirements:** Requires [mkdocs](https://www.mkdocs.org/) and
+**Requirements:** Requires git, [mkdocs](https://www.mkdocs.org/) and
 [mkdocstrings](https://mkdocstrings.github.io/) to be installed and configured.
 
 ## Features
