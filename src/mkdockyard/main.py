@@ -4,6 +4,7 @@ import logging
 import os
 import shutil
 import subprocess
+from dataclasses import dataclass
 from pathlib import Path
 
 from mkdocs.config import base
@@ -14,6 +15,14 @@ from mkdocs.plugins import BasePlugin
 from platformdirs import user_cache_dir
 
 log = logging.getLogger(f"mkdocs.plugins.{__name__}")
+
+
+@dataclass
+class CloneInformation:
+    name: str
+    url: str
+    ref: str
+    hashed_dir: Path
 
 
 class _Repos(base.Config):
@@ -54,7 +63,8 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
         python = handlers.setdefault("python", {})
         paths = python.setdefault("paths", ["."])
 
-        clone_information = []
+        clone_information: list[CloneInformation] = []
+
         for repo in repos:
             name = repo.name
             url = repo.url
@@ -65,18 +75,16 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
 
             paths.append(str(hashed_dir))
 
-            clone_information.append(
-                {"name": name, "url": url, "ref": ref, "hashed_dir": hashed_dir}
-            )
+            clone_information.append(CloneInformation(name, url, ref, hashed_dir))
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             future_to_clone = {
                 executor.submit(
                     self.clone_git_repo,
-                    name=info["name"],
-                    url=info["url"],
-                    ref=info["ref"],
-                    hashed_dir=info["hashed_dir"],
+                    name=info.name,
+                    url=info.url,
+                    ref=info.ref,
+                    hashed_dir=info.hashed_dir,
                     git_supports_revision=git_supports_revision,
                 ): info
                 for info in clone_information
@@ -87,12 +95,12 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
                 except subprocess.CalledProcessError as e:
                     info = future_to_clone[future]
                     raise ConfigurationError(
-                        f"Failed to fetch git URL '{info['url']}' for ref '{info['ref']}'."
+                        f"Failed to fetch git URL '{info.url}' for ref '{info.ref}'."
                         " See Git output below:\n"
                         f"{e.stderr}"
                     )
 
-        configured_repos = [info.get("hashed_dir") for info in clone_information]
+        configured_repos = [info.hashed_dir for info in clone_information]
         cached_repos = os.listdir(cache_dir)
         len_configured = len(configured_repos)
         n_unused_in_cache = len(cached_repos) - len_configured
@@ -109,7 +117,8 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
                 cache_dir=cache_dir,
             )
 
-    def get_git_version(self) -> tuple[int, int]:
+    @staticmethod
+    def get_git_version() -> tuple[int, int]:
         version_string = subprocess.run(
             ["git", "--version"], check=True, capture_output=True, text=True
         )
@@ -120,7 +129,8 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
 
         return major_version, minor_version
 
-    def subprocess_run_wrapper(self, args: list[str], output_path: Path):
+    @staticmethod
+    def subprocess_run_wrapper(args: list[str], output_path: Path):
         subprocess.run(
             args,
             cwd=output_path,
@@ -129,8 +139,8 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
             text=True,
         )
 
+    @staticmethod
     def clone_git_repo(
-        self,
         url: str,
         ref: str,
         hashed_dir: Path,
@@ -157,15 +167,17 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
                 return
 
             os.makedirs(output_path)
-            self.subprocess_run_wrapper(args=["git", "init"], output_path=output_path)
-            self.subprocess_run_wrapper(
+            MkdockyardPlugin.subprocess_run_wrapper(
+                args=["git", "init"], output_path=output_path
+            )
+            MkdockyardPlugin.subprocess_run_wrapper(
                 args=["git", "remote", "add", "origin", url], output_path=output_path
             )
-            self.subprocess_run_wrapper(
+            MkdockyardPlugin.subprocess_run_wrapper(
                 args=["git", "fetch", "--depth", "1", "origin", ref],
                 output_path=output_path,
             )
-            self.subprocess_run_wrapper(
+            MkdockyardPlugin.subprocess_run_wrapper(
                 args=["git", "checkout", "FETCH_HEAD"], output_path=output_path
             )
         elif not output_path.exists():
@@ -177,8 +189,9 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
         else:
             log.info(f"Reusing repo {url}")
 
+    @staticmethod
     def prune_cache(
-        self, output_paths: list[Path], cached_repos: list[Path], cache_dir: Path
+        output_paths: list[Path], cached_repos: list[Path], cache_dir: Path
     ) -> None:
         for repo in cached_repos:
             if repo in output_paths:
