@@ -2,7 +2,6 @@ import concurrent.futures
 import hashlib
 import logging
 import os
-import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -18,8 +17,6 @@ log = logging.getLogger(f"mkdocs.plugins.{__name__}")
 
 
 class _Repos(base.Config):
-    """The repos config option. Defines"""
-
     name = c.Type(str)
     url = c.Type(str)
     ref = c.Type(str)
@@ -84,9 +81,7 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
                 ): info
                 for info in clone_information
             }
-            for i, future in enumerate(
-                concurrent.futures.as_completed(future_to_clone)
-            ):
+            for future in concurrent.futures.as_completed(future_to_clone):
                 try:
                     future.result()
                 except subprocess.CalledProcessError as e:
