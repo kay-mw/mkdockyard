@@ -355,7 +355,12 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
             )
             os.rename(old_name_path, output_path)
         else:
-            log.info(f"Reusing repo {url}")
+            # Hashes are long (64 characters), so this cuts off the last 61 characters
+            # so only a sample is shown in the logs.
+            hashed_dir_sample = Path(str(hashed_dir)[:-61] + "...")
+            log.info(
+                f"Reusing repo '{name}' located at '{hashed_dir_sample.joinpath(name)}'"
+            )
 
         return False
 
