@@ -6,7 +6,7 @@ authors = [
 ]
 description = "Allows for the integration of multiple repos into a single mkdocs instance - no git submodules required. The repos are coming to dock 🚢"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 classifiers = [
   "Programming Language :: Python :: 3",
   "Operating System :: OS Independent",
@@ -14,8 +14,8 @@ classifiers = [
 license = "MIT"
 license-files = ["LICENSE"]
 dependencies = [
-    "mkdocs>=1.6.1",
-    "platformdirs>=4.5.1",
+    "mkdocs>=1.6.0",
+    "platformdirs>=2.2.0",
 ]
 
 [project.entry-points."mkdocs.plugins"]
@@ -24,3 +24,8 @@ mkdockyard = "mkdockyard.main:MkdockyardPlugin"
 [build-system]
 requires = ["uv_build >= 0.9.26, <0.10.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "mkdocstrings-python>=2.0.1",
+]
