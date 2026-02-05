@@ -13,6 +13,11 @@ uv add mkdockyard
 **Requirements:** Requires git, [mkdocs](https://www.mkdocs.org/) and
 [mkdocstrings](https://mkdocstrings.github.io/) to be installed and configured.
 
+> [!IMPORTANT]
+> `mkdockyard` must be listed **before** `mkdocstrings` in your `plugins`
+> configuration, as it needs to set up repository paths before mkdocstrings
+> processes them.
+
 ## Features
 
 - **Lean & parallel cloning** - Only fetches the specified ref, and fetches
