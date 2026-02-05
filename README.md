@@ -58,7 +58,7 @@ plugins:
 
 <!-- Schema: `::: [name-in-mkdockyard-repos-config].path.to.your.module` -->
 
-textual.src.textual.cache.LRUCache
+::: textual.src.textual.cache.LRUCache
 
 ::: rich.rich.console.ConsoleDimensions
 
