@@ -11,10 +11,10 @@ from mkdocs.config import base
 from mkdocs.config import config_options as c
 from mkdocs.config.defaults import MkDocsConfig
 from mkdocs.exceptions import ConfigurationError, PluginError
-from mkdocs.plugins import BasePlugin
+from mkdocs.plugins import BasePlugin, get_plugin_logger
 from platformdirs import user_cache_dir
 
-log = logging.getLogger(f"mkdocs.plugins.{__name__}")
+log = get_plugin_logger(__name__)
 
 
 @dataclass
@@ -155,9 +155,7 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
                     paths.append(str(future_to_clone[future].hashed_dir))
 
                     if cloned:
-                        log.info(
-                            f"mkdockyard: Fetched '{info.url}' at ref '{info.ref}'"
-                        )
+                        log.info(f"Fetched '{info.url}' at ref '{info.ref}'")
                 except subprocess.CalledProcessError as e:
                     raise ConfigurationError(
                         f"mkdockyard: Failed to fetch git URL '{info.url}' for ref"
@@ -172,7 +170,7 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
         cache_limit = len_configured * self.config.cache_limit_multiplier
         if n_unused_in_cache > cache_limit:
             log.info(
-                f"mkdockyard: Detected {n_unused_in_cache} unused repo(s) in the cache,"
+                f"Detected {n_unused_in_cache} unused repo(s) in the cache,"
                 f" which exceeds the cache limit of {cache_limit}. Pruning..."
             )
             cached_repos = [Path(cache_dir.joinpath(repo)) for repo in cached_repos]
@@ -230,7 +228,7 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
 
             if "/" in name or "\\" in name:
                 log.warning(
-                    f"mkdockyard: Repo name {name} contains a slash. Including slashes"
+                    f"Repo name {name} contains a slash. Including slashes"
                     " in names is discouraged, as this may result in your name prefix"
                     " being two directories (`before_slash.after_slash.my.module`) if"
                     " there are characters after the slash."
@@ -353,12 +351,11 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
         elif not output_path.exists():
             old_name_path = hashed_dir.joinpath(os.listdir(hashed_dir)[0])
             log.info(
-                f"mkdockyard: Name change detected. Renaming '{old_name_path}' to"
-                f" '{output_path}'"
+                f"Name change detected. Renaming '{old_name_path}' to '{output_path}'"
             )
             os.rename(old_name_path, output_path)
         else:
-            log.info(f"mkdockyard: Reusing repo {url}")
+            log.info(f"Reusing repo {url}")
 
         return False
 
