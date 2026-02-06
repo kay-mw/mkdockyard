@@ -6,10 +6,13 @@ plugins:
         - name: textual
           url: "https://github.com/Textualize/textual.git"
           ref: "501372027f3abc75561881e3803efc34098dabe1"
+          handler: python
         - name: rich
           url: "https://github.com/Textualize/rich.git"
           ref: "1d402e0c59f8765e420a5a4440eb2fca7465d1ae"
+          handler: python
         - name: pydantic
           url: "https://github.com/pydantic/pydantic.git"
           ref: "08b64f7a43f96f02bb0af8d46aba67b3a68d6e88"
+          handler: python
   - mkdocstrings:

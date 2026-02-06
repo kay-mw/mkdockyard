@@ -1,6 +1,5 @@
 import concurrent.futures
 import hashlib
-import logging
 import os
 import shutil
 import subprocess
@@ -10,7 +9,7 @@ from pathlib import Path
 from mkdocs.config import base
 from mkdocs.config import config_options as c
 from mkdocs.config.defaults import MkDocsConfig
-from mkdocs.exceptions import ConfigurationError, PluginError
+from mkdocs.exceptions import PluginError
 from mkdocs.plugins import BasePlugin, get_plugin_logger
 from platformdirs import user_cache_dir
 
@@ -23,10 +22,19 @@ class CloneInformation:
 
     name: str
     """The name of the directory to clone into."""
+
     url: str
     """The `.git` URL of the repo to clone."""
+
     ref: str
     """The ref of the repo to clone."""
+
+    handler: str
+    """
+    The language handler to use for this repo. Must be one of the
+    [supported mkdocstrings handlers](https://mkdocstrings.github.io/usage/handlers/).
+    """
+
     hashed_dir: Path
     """
     A digested SHA256 hash representing the unique combination of the `url` and `ref`.
@@ -43,22 +51,32 @@ class _Repos(base.Config):
     referencing files from this repo in your documentation.
 
     Example: 'textual'
-    Reference in documentation: `::: textual.path.to.some.module`
+    Reference in documentation: `textual.path.to.some.module`
     """
+
     url = c.Type(str)
     """
     The `.git` URL of the repo. 
 
     Example: 'https://github.com/Textualize/textual.git'
     """
+
     ref = c.Type(str)
     """
-    The ref of the repo to clone. The ref can be any reference that git can checkout as
-    a revision, such as a branch or commit hash. Commit hashes are recommended, for
-    reproducibility when deploying in CI.
+    The ref of the repo to clone. The ref can be any reference that git can checkout,
+    such as a branch or commit hash. Commit hashes are recommended, for reproducibility
+    when deploying in CI.
 
     Example: '501372027f3abc75561881e3803efc34098dabe1'
     Example: 'main'
+    """
+
+    handler = c.Choice(
+        ("c", "crystal", "github", "python", "matlab", "shell", "typescript", "vba")
+    )
+    """
+    The language handler to use for this repo. Must be one of the
+    [supported mkdocstrings handlers](https://mkdocstrings.github.io/usage/handlers/).
     """
 
 
@@ -67,8 +85,8 @@ class MkdockyardConfig(base.Config):
 
     repos = c.ListOfItems(c.SubConfig(_Repos))
     """
-    A list of one or more repos, each containing the attributes `name`, `url`, and
-    `ref`.
+    A list of one or more repos, each containing the attributes `name`, `url`, `ref`
+    and `handler`.
 
     Example:
 
@@ -77,6 +95,7 @@ class MkdockyardConfig(base.Config):
           - name: 'textual'
             url: 'https://github.com/Textualize/textual.git'
             ref: '501372027f3abc75561881e3803efc34098dabe1'
+            handler: 'python'
         ```
     """
     cache_limit_multiplier = c.Type(int, default=2)
@@ -122,7 +141,7 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
         plugins = config.plugins
         if "mkdocstrings" not in plugins:
             defined_plugins = list(plugins.keys())
-            raise ConfigurationError(
+            raise PluginError(
                 "mkdockyard: Failed to find the key 'mkdocstrings' in your plugin config."
                 " Are you sure you have 'mkdocstrings' defined under `plugins` in"
                 " your `mkdocs.yml`?\n"
@@ -130,9 +149,6 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
             )
 
         handlers = plugins["mkdocstrings"].config.setdefault("handlers", {})
-        python = handlers.setdefault("python", {})
-        paths = python.setdefault("paths", ["."])
-
         clone_information = self.build_clone_information(
             repos=repos, cache_dir=cache_dir
         )
@@ -152,12 +168,15 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
                 info = future_to_clone[future]
                 try:
                     cloned = future.result()
-                    paths.append(str(future_to_clone[future].hashed_dir))
+
+                    language = handlers.setdefault(info.handler, {})
+                    paths = language.setdefault("paths", ["."])
+                    paths.append(str(info.hashed_dir))
 
                     if cloned:
                         log.info(f"Fetched '{info.url}' at ref '{info.ref}'")
                 except subprocess.CalledProcessError as e:
-                    raise ConfigurationError(
+                    raise PluginError(
                         f"mkdockyard: Failed to fetch git URL '{info.url}' for ref"
                         f" '{info.ref}'. See Git output below:\n"
                         f"{e.stderr}"
@@ -225,6 +244,7 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
             name = repo.name
             url = repo.url
             ref = repo.ref
+            handler = repo.handler
 
             if "/" in name or "\\" in name:
                 log.warning(
@@ -237,7 +257,9 @@ class MkdockyardPlugin(BasePlugin[MkdockyardConfig]):
             hashed_name = hashlib.sha256((url + ref).encode()).hexdigest()
             hashed_dir = cache_dir.joinpath(hashed_name)
 
-            clone_information.append(CloneInformation(name, url, ref, hashed_dir))
+            clone_information.append(
+                CloneInformation(name, url, ref, handler, hashed_dir)
+            )
 
         return clone_information
 
