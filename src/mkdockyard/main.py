@@ -72,7 +72,8 @@ class _Repos(base.Config):
     """
 
     handler = c.Choice(
-        ("c", "crystal", "github", "python", "matlab", "shell", "typescript", "vba")
+        ("c", "crystal", "github", "python", "matlab", "shell", "typescript", "vba"),
+        default="python",
     )
     """
     The language handler to use for this repo. Must be one of the
